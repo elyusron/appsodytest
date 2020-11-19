@@ -3,9 +3,9 @@ def public_route_prefix = ''
 
 def git_branch = 'master'
 def env = 'demo'
-def nexus_base_url = 'https://library.mylabzolution.com'
-def nexus_deps_repo = "$nexus_base_url/repository/ist_maven/"
-def nexus_deploy_repo = "$nexus_base_url/repository/mvn_ist/"
+def nexus_base_url = 'http://10.30.30.213:8081'
+def nexus_deps_repo = "$nexus_base_url/repository/ist_maven_proxy/"
+def nexus_deploy_repo = "$nexus_base_url/repository/maven-releases/"
 
 def ocp_project = 'demo'
 def oc_command = 'create'
@@ -57,7 +57,7 @@ node (){
     //   sh 'mvn failsafe:integration-test -s ./cicd-template/maven/settings.xml'
     //}
     stage('Update Sonar Code Quality'){
-        sh 'mvn sonar:sonar -Dsonar.host.url=http://sonarqube-cimb-sonarq.apps.cimb1.rht-labs.com -s ./cicd-template/maven/settings.xml' 
+        sh 'mvn sonar:sonar -Dsonar.host.url=http://10.30.30.215:9000/ -s ./cicd-template/maven/settings.xml' 
     }
 
     stage ('Archive'){
@@ -67,7 +67,8 @@ node (){
         withCredentials([[$class: 'UsernamePasswordMultiBinding',
             credentialsId: 'oc-demo',
             usernameVariable: 'oc_username', passwordVariable: 'oc_password']]) {
-                  sh 'oc login -u=${oc_username} -p=${oc_password} https://okd.mylabzolution.com:8443 --insecure-skip-tls-verify=true'
+                //   sh 'oc login -u=${oc_username} -p=${oc_password} https://ocp.mylabzolution.com:8443 --insecure-skip-tls-verify=true'
+                    sh 'oc login --token=KehJFsZ5K7IUhfImlGlAXqukBPgGeIghbBglLP1uISg --server=https://c101-e.jp-tok.containers.cloud.ibm.com:30157'
                }
 
         appMajorVersion = appFullVersion.substring(0, appFullVersion.indexOf('.'))
@@ -93,7 +94,7 @@ node (){
 
                 oc project ${ocp_project}
                 oc process -f ./cicd-template/openshift/build-config-template.yaml -n ${ocp_project} \
-                -p S2I_BUILD_IMAGE='openjdk-11-rhel7' -p S2I_BUILD_IMAGE_PULL_SECRET='default-dockercfg-czzh4' \
+                -p S2I_BUILD_IMAGE='openjdk-11-rhel7' -p S2I_BUILD_IMAGE_PULL_SECRET='default-dockercfg-7kc7p' \
                 -p APP_NAME='${appName}' -p APP_FULL_VERSION='${appFullVersion}' -p APP_MAJOR_VERSION='${appMajorVersion}' \
                 -p GIT_COMMIT_ID=${gitCommitId} -p JENKINS_BUILD_NUMBER=${BUILD_NUMBER} \
                 | oc ${oc_command} -n ${ocp_project} -f -
