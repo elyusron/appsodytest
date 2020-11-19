@@ -19,7 +19,7 @@ def appName
 def appFullVersion
 def gitCommitId
 
-node ('maven'){
+// node ('maven'){
     stage('Checkout') {
         git url: "${git_repo}", branch: "${git_branch}", credentialsId: 'elyusron_github_credential'
     }
@@ -150,7 +150,7 @@ node ('maven'){
                 """
         }
     }
-}
+// }
 
 
 def getFromPom(key) {
